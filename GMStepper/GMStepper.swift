@@ -352,9 +352,17 @@ import UIKit
 
     func updateValue() {
         if stepperState == .ShouldIncrease {
-            value += stepValue
+            if value == maximumValue && wrapValue {
+                value = minimumValue
+            } else {
+                value += stepValue
+            }
         } else if stepperState == .ShouldDecrease {
-            value -= stepValue
+            if value == minimumValue && wrapValue {
+                value = maximumValue
+            } else {
+                value -= stepValue
+            }
         }   
     }
 
