@@ -29,50 +29,73 @@ import UIKit
             } else {
                 label.text = String(stringInterpolationSegment: value)
             }
-
+            let displayUnits = value == 1 ? unitSingular : units
+            label.text?.append(" \(displayUnits)")
+            
             if oldValue != value {
                 sendActions(for: .valueChanged)
             }
         }
     }
-
+    
     /// Minimum value. Must be less than maximumValue. Defaults to 0.
     @objc @IBInspectable public var minimumValue: Double = 0 {
         didSet {
             value = min(maximumValue, max(minimumValue, value))
         }
     }
-
+    
     /// Maximum value. Must be more than minimumValue. Defaults to 100.
     @objc @IBInspectable public var maximumValue: Double = 100 {
         didSet {
             value = min(maximumValue, max(minimumValue, value))
         }
     }
-
+    
     /// Step/Increment value as in UIStepper. Defaults to 1.
     @objc @IBInspectable public var stepValue: Double = 1
-
+    
+    /// Append a unit to the stepper label
+    @objc @IBInspectable public var units: String = "" {
+        didSet {
+            if (value != 1){
+                label.text?.append(" \(units)")
+            }
+        }
+    }
+    
+    /// Singular form of the unit for the stepper label
+    @objc @IBInspectable public var unitSingular: String = "" {
+        didSet {
+            if (value == 1){
+                label.text?.append(" \(unitSingular)")
+            }
+        }
+    }
+    
     /// The same as UIStepper's autorepeat. If true, holding on the buttons or keeping the pan gesture alters the value repeatedly. Defaults to true.
     @objc @IBInspectable public var autorepeat: Bool = true
-
+    
     /// If the value is integer, it is shown without floating point.
     @objc @IBInspectable public var showIntegerIfDoubleIsInteger: Bool = true
-
+    
+    /// When the maximum or minimum values are exceeded, wrap to the lower or upper bounds as necessary
+    @objc @IBInspectable public var wrapValue: Bool = false
+    
     /// Text on the left button. Be sure that it fits in the button. Defaults to "−".
     @objc @IBInspectable public var leftButtonText: String = "−" {
         didSet {
             leftButton.setTitle(leftButtonText, for: .normal)
         }
     }
-
+    
     /// Text on the right button. Be sure that it fits in the button. Defaults to "+".
     @objc @IBInspectable public var rightButtonText: String = "+" {
         didSet {
             rightButton.setTitle(rightButtonText, for: .normal)
         }
     }
-
+    
     /// Text color of the buttons. Defaults to white.
     @objc @IBInspectable public var buttonsTextColor: UIColor = UIColor.white {
         didSet {
@@ -429,29 +452,29 @@ extension GMStepper {
         rightButton.isEnabled = false
         label.isUserInteractionEnabled = false
         resetTimer()
-
-        if value == minimumValue {
+        
+        if value == minimumValue && !wrapValue {
             animateLimitHitIfNeeded()
         } else {
             stepperState = .ShouldDecrease
             animateSlideLeft()
         }
-
+        
     }
-
+    
     @objc func rightButtonTouchDown(button: UIButton) {
         leftButton.isEnabled = false
         label.isUserInteractionEnabled = false
         resetTimer()
-
-        if value == maximumValue {
+        
+        if value == maximumValue && !wrapValue {
             animateLimitHitIfNeeded()
         } else {
             stepperState = .ShouldIncrease
             animateSlideRight()
         }
     }
-
+    
     @objc func buttonTouchUp(button: UIButton) {
         reset()
     }
